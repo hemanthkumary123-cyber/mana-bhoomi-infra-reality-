@@ -854,23 +854,59 @@
 </div>
 
 <!-- ============ MANAGER LOGIN ============ -->
-<div class="modal-backdrop" id="managerLoginModal">
-  <div class="modal" style="max-width:420px">
-    <div class="modal-header">
-      <h2>🔐 Manager Login</h2>
-      <button class="close-btn" onclick="closeManagerLogin()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="field"><label for="managerEmail">Manager Email</label><input type="email" id="managerEmail" autocomplete="username" placeholder="manager@example.com"></div>
-      <div class="field"><label for="managerPassword">Password</label><input type="password" id="managerPassword" autocomplete="current-password" placeholder="Password"></div>
-      <div class="field-hint" id="loginMessage"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeManagerLogin()">Cancel</button>
-      <button class="btn-save" id="managerLoginSubmit">Login</button>
-    </div>
-  </div>
-</div>
+
+async function managerLogin() {
+  const message = document.getElementById("loginMessage");
+  const email = document.getElementById("managerEmail").value.trim();
+  const password = document.getElementById("managerPassword").value;
+  const button = document.getElementById("managerLoginSubmit");
+
+  if (!dbConfigured()) {
+    message.textContent =
+      "Supabase is not configured. Check your project URL and publishable key.";
+    return;
+  }
+
+  if (!email || !password) {
+    message.textContent = "Enter your manager email and password.";
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Logging in...";
+  message.textContent = "";
+
+  try {
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+    if (error) throw error;
+
+    // Verify that this is the authorized manager account.
+    const allowedEmail = "hemanthkumar.y123@gmail.com"; // Replace with your real manager email
+
+    if (data.user.email?.toLowerCase() !== allowedEmail.toLowerCase()) {
+      await supabaseClient.auth.signOut();
+      throw new Error("This account is not authorized as a manager.");
+    }
+
+    managerSession = data.session;
+    document.body.classList.add("manager-mode");
+    closeManagerLogin();
+
+    await loadPlotsFromDatabase();
+    toast("Manager login successful!");
+
+  } catch (error) {
+    message.textContent = error.message || "Login failed.";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Login";
+  }
+}
 
 <!-- ============ MANAGER DASHBOARD ============ -->
 <div class="modal-backdrop" id="managerDashboardModal">
