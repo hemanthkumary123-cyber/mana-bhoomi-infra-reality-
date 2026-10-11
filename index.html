@@ -1007,8 +1007,8 @@ async function importLocalPlotsToDatabase() {
 }
 async function managerLogin() {
   if (!dbConfigured()) { document.getElementById('loginMessage').textContent='https://zbvgpcnuocplamexqivw.supabase.cosb_publishable_WEVO5rXp1uyocauV8gnsTA_mOnG7cth'; return; }
-  const email=document.getElementById('hemanth').value.trim();
-  const password=document.getElementById('hemanth').value;
+  const email=document.getElementById('hemanthkumar.y123@gmail.com').value.trim();
+  const password=document.getElementById('hemanth1').value;
   if (!email || !password) { document.getElementById('loginMessage').textContent='Enter email and password.'; return; }
   const btn=document.getElementById('managerLoginSubmit'); btn.disabled=true; btn.textContent='Logging in…';
   const { data, error } = await supabaseClient.auth.signInWithPassword({email,password});
